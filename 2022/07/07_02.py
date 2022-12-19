@@ -164,23 +164,33 @@ def traverse(root, handler, state):
             child = e.get_next_child(child)
 
 class State:
-    def __init__(self, size = 0):
-        self._size = size
+    def __init__(self, target):
+        self._target = target
+        self._size = None
         
     def add(self, size):
-        self._size += size
-        
+        if self.size is None or self.size > size:
+            self._size = size
+         
     @property
     def size(self):
         return self._size
 
-def size_less_than_100000(state, entry):
+    @property
+    def target(self):
+        return self._target
+
+def size_more_than_target(state, entry):
     if entry.is_dir:
         size = entry.get_size()
-        if size <= 100000:
+        if size > state.target:
             state.add(size)
 
-state = State()
-traverse(root, size_less_than_100000, state)
+target = root.get_size() - (70000000 - 30000000)
+
+print("Target: %s" % target)
+
+state = State(target)
+traverse(root, size_more_than_target, state)
 
 print("answer: %d" % state.size)
