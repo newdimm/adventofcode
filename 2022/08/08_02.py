@@ -12,36 +12,40 @@ for line in f:
     forest.append(row)
     visible.append([0] * len(row))
     
-y_max = [-1] * len(forest[0])
+def score(x,y):
+    c = forest[y][x]
+    xp = 0
+    for cx in range(x+1, len(forest[0])):
+        xp += 1
+        if forest[y][cx] >= c:
+            break
+
+    xm = 0
+    for cx in range(x-1, -1, -1):
+        xm += 1
+        if forest[y][cx] >= c:
+            break
+
+    yp = 0
+    for cy in range(y+1, len(forest)):
+        yp += 1
+        if forest[cy][x] >= c:
+            break
+
+    ym = 0
+    for cy in range(y-1, -1, -1):
+        ym += 1
+        if forest[cy][x] >= c:
+            break
+    return xp*xm*yp*ym
+
+max_score = 0
 for y in range(len(forest)):
-    x_max = -1
     for x in range(len(forest[0])):
-        current = forest[y][x]
-        if current > x_max:
-            visible[y][x] = 1
-            x_max = current
-        if current > y_max[x]:
-            visible[y][x] = 1
-            y_max[x] = current
+        max_score = max(max_score, score(x,y))
         
-print("")
+        
 
-y_max = [-1] * len(forest[0])
-for y in range(len(forest)-1, -1, -1):
-    x_max = -1
-    for x in range(len(forest[0])-1, -1, -1):
-        current = forest[y][x]
-        if current > x_max:
-            visible[y][x] = 1
-            x_max = current
-        if current > y_max[x]:
-            visible[y][x] = 1
-            y_max[x] = current
-
-count = 0
-for row in visible:
-    #print(row)
-    count += sum(row)
     
-print(count)
+print(max_score)
 
