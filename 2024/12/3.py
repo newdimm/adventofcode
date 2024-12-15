@@ -51,55 +51,6 @@ def find_start(map, seen):
 full_cost = 0
 seen = {}
 
-def print_sides(sides, mx ,my):
-    map = []
-    for y in range(my+1):
-        l = []
-        for x in range(mx+1):
-            l.append(".")
-        map.append(l)
-        
-    for (x,y) in sides.keys():
-        nx,ny = sides[(x,y)]
-        if y == ny:
-            if x < nx:
-                map[y][x] = "-"
-            else:
-                map[y][x] = "-"
-        else:
-            if y < ny:
-                map[y][x] = "|"
-            else:
-                map[y][x] = "|"
-                
-    for line in map:
-        s = ""
-        for l in line:
-            s += l
-        print(s)
-
-def optimise(sides, x,y, seen):
-    
-    count = len(sides)
-    
-    #print("%s: sides=%s start=(%d,%d)" % (plant, sides, x,y))
-    #print_sides(sides,mx,my)
-    
-    for i in range(count):
-        nx,ny = sides[(x,y)]
-        seen[(x,y)] = True
-        nnx,nny = sides[(nx,ny)]
-        seen[(nx,ny)] = True
-        while x == nx and nx == nnx or y == ny and ny == nny:
-            del sides[(nx,ny)]
-            sides[(x,y)] = (nnx,nny)
-            nx,ny = nnx,nny
-            nnx,nny = sides[(nx,ny)]
-        x,y = nx,ny
-        
-    #print_sides(sides,mx,my)
-    
-
 while True:
     x,y = find_start(map, seen)
     plant = map[y][x]
@@ -120,13 +71,13 @@ while True:
         neighs = get_neighs(map, x, y)
         
         if (x,y-1) not in neighs:
-            sides[(x,y)] = (x+1,y)
+            sides[(x,y,"u")] = (x,y)
         if (x+1,y) not in neighs:
-            sides[(x+1,y)] = (x+1,y+1)
+            sides[(x,y,"r")] = (x,y)
         if (x,y+1) not in neighs:
-            sides[(x+1,y+1)]= (x,y+1)
+            sides[(x,y,"d")] = (x,y)
         if (x-1,y) not in neighs:
-            sides[(x,y+1)] = (x,y)
+            sides[(x,y,"l")] = (x,y)
         
         for (nx,ny) in neighs:
             if (nx,ny) not in seen:
@@ -134,20 +85,40 @@ while True:
                 stack.append((nx,ny))
                 
     s = {}
-    p = 1
     while True:
-        for (x,y) in sides:
-            if (x,y) not in s:
+        for x,y,dir in sides:
+            if (x,y,dir) not in s:
                 break
-        if (x,y) in s:
-            #print("stop")
+        if (x,y,dir) in s:
             break
+        s[(x,y,dir)] = True
         
-        #print("[%d]: from (%d, %d)" % (p,x,y))
-        optimise(sides, x,y, s)
-        #print_sides(sides, mx, my)
-        p += 1
-    
+        ex,ey = sides[(x,y,dir)]
+        if dir == "l":
+            while (ex,ey-1,dir) in sides:
+                nex,ney = sides[(ex,ey-1,dir)]
+                del sides[(ex,ey-1,dir)]
+                sides[(x,y,dir)] = (nex,ney)
+                ex,ey = sides[(x,y,dir)]
+        elif dir == "r":
+            while (ex,ey+1,dir) in sides:
+                nex,ney = sides[(ex,ey+1,dir)]
+                del sides[(ex,ey+1,dir)]
+                sides[(x,y,dir)] = (nex,ney)
+                ex,ey = sides[(x,y,dir)]
+        elif dir == "u":
+            while (ex+1,ey,dir) in sides:
+                nex,ney = sides[(ex+1,ey,dir)]
+                del sides[(ex+1,ey,dir)]
+                sides[(x,y,dir)] = (nex,ney)
+                ex,ey = sides[(x,y,dir)]
+        elif dir == "d":
+            while (ex-1,ey,dir) in sides:
+                nex,ney = sides[(ex-1,ey,dir)]
+                del sides[(ex-1,ey,dir)]
+                sides[(x,y,dir)] = (nex,ney)
+                ex,ey = sides[(x,y,dir)]
+                
     perimeter = len(sides)
 
     cost = area * perimeter
