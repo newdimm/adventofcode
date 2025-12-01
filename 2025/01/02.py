@@ -19,16 +19,20 @@ with open(fname, "rt") as f:
 
         delta = int(line[1:])
 
-        if line[0] == "L":
-            delta = -delta
+        if line[0] == "R":
+            dial += delta
+            rounds = dial // 100
+            dial = dial % 100
+        else:
+            dial = (100 - dial)%100
+            dial += delta
+            rounds = dial // 100
+            dial = dial % 100
+            dial = (100 - dial)%100
 
-        dial += delta
-        dial = dial % 100
-
-        if dial == 0:
-            counter += 1
+        counter += rounds
 
         if debug:
-            print(line, dial, counter)
+            print(line, dial, rounds, counter)
 
 print(counter)
